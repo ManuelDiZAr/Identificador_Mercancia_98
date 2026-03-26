@@ -2,35 +2,57 @@ import pandas as pd
 import os
 import openpyxl
 
-ruta=os.path.join("pruebas",'98s.xlsx')
-ruta_destino=os.path.join("pruebas","Reporte.csv")
-df_98=pd.read_excel(ruta)
-print(df_98)
+
+
 
 #Creo el DF que será el reporte final
-df_reporte = pd.DataFrame(columns=['SKU'])
-print("Reporte inicial")
-print(df_reporte)
+def CrearDF_Final():
+    
+    df_reporte = pd.DataFrame(columns=['SKU','Descripcion'])
+    print("Reporte inicial Creado")
+    return df_reporte
 
-df_98['SKU'] = df_98['SKU'].astype(str).str.strip() #Convierto todos los datos de SKU a columna
+def CargarDF_98():
+    ruta=os.path.join("archivos",'98s.xlsx')
+    df_98=pd.read_excel(ruta)
+    df_98['SKU'] = df_98['SKU'].astype(str).str.strip() #Convierto todos los datos de SKU a STRing
+    print(df_98)
+    print("Termino de imprimir el DF98-----------")
+    return df_98
 
-def revisar(sku_escaneado,df_reporte,df_referencia):
+def RevisarSKU(sku_escaneado,df_reporte,df_referencia):
     """
-    Revisa si el sku escaneado está en la tabla de referencia
+    Busca el SKU, extrae su descripción y lo añade al reporte.
     """
-    if sku_escaneado in df_referencia["SKU"].values: #Busca el SKU en los valores de SKU
-        df_temporal=pd.DataFrame({'SKU': [sku_escaneado]}) #Creo un DF temporal para poder agregarlo al DF del reporte
-        df_reporte=pd.concat([df_reporte,df_temporal],ignore_index=True) #Agrego el DF
-        return df_reporte #Regreso el DF unido
-    else: #Si no se econtró el SKU escaneado, regreso el DF inicial
-        return df_reporte
+    # Convertimos a string para asegurar que la comparación sea exacta
+    sku_buscado = str(sku_escaneado)
+    df_referencia["SKU"] = df_referencia["SKU"].astype(str)
 
-df_reporte=revisar("1",df_reporte,df_98)
-df_reporte=revisar("5",df_reporte,df_98)
-df_reporte=revisar("7",df_reporte,df_98)
-df_reporte=revisar("21",df_reporte,df_98)
+    # 1. Buscamos si existe en la referencia
+    if sku_buscado in df_referencia["SKU"].values:
+        
+        # 2. "VLOOKUP": Extraemos la descripción de esa fila específica
+        # .loc[filas, columnas]
+        descripcion = df_referencia.loc[df_referencia["SKU"] == sku_buscado, "DESCRIPCION"].values[0]
+        
+        # 3. Creamos el DF temporal incluyendo la descripción
+        df_temporal = pd.DataFrame({
+            'SKU': [sku_buscado], 
+            'Descripcion': [descripcion]
+        })
+        
+        # 4. Unimos al reporte
+        df_reporte = pd.concat([df_reporte, df_temporal], ignore_index=True)
+        
+        # Retornamos el DF, el estatus de éxito y la descripción encontrada
+        return df_reporte, descripcion , True
+    
+    else:
+        # Si no existe, retornamos el DF sin cambios y None en la descripción
+        return df_reporte, None, False
+    
+def Generar_Reporte(DF):
+    ruta_destino=os.path.join("archivos","Reporte.csv")
+    DF.to_csv(ruta_destino, index=False)
 
-print("\nReporte Final")
-df_reporte=pd.merge(df_reporte, df_98, on='SKU', how='left') #Hago el left Join para generar el reporte final
-print(df_reporte)
-df_reporte.to_csv(ruta_destino, index=False, encoding='utf-8-sig')
+

@@ -1,10 +1,11 @@
 import customtkinter as ctk
-
+import os
+from funciones import CrearDF_Final, CargarDF_98, RevisarSKU, Generar_Reporte
 
 class SkuListado(ctk.CTkFrame):
     def __init__(self, master,sku, descripcion, **kwargs):
         super().__init__(master,**kwargs)
-        # Dale más peso a la descripción (columna 1) para que sea la que más crezca
+        # Se distribuyen pesos de las columnas
         self.grid_columnconfigure(0, weight=1) # SKU
         self.grid_columnconfigure(1, weight=3) # Descripcion (más larga)
         self.grid_columnconfigure(2, weight=0) # El botón no necesita crecer
@@ -22,6 +23,12 @@ class SkuListado(ctk.CTkFrame):
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
+        #Cargamos los dos archivos con los que vamos a trabajar
+        self.df_final=CrearDF_Final()
+        print("Archivo de referencia cargado con exito")
+        self.df_referencia=CargarDF_98()
+        print("Archivo de reporte final creado con exito")
+
 
         self.title("Verificador de 98's")
         self.geometry("800x500")
@@ -62,13 +69,13 @@ class App(ctk.CTk):
         self.label_sku.grid(row=0,column=0)
         self.entrada_sku=ctk.CTkEntry(self.frame_row1)
         self.entrada_sku.grid(row=0,column=1)
-        self.btn_verificar=ctk.CTkButton(self.frame_row1,text="Verificar")
+        self.btn_verificar=ctk.CTkButton(self.frame_row1,text="Verificar",command=self.BTN_Verificar)
         self.btn_verificar.grid(row=0,column=2,padx=10)
         #ROW 1
         self.label_sino=ctk.CTkLabel(self.frame1,text="Este label debe de cambiar a Sí es 98 o No Es 98 ")
         self.label_sino.grid(row=1)
         #ROW 2
-        self.btn_generar=ctk.CTkButton(self.frame1,text="Generar Reporte de 98's")
+        self.btn_generar=ctk.CTkButton(self.frame1,text="Generar Reporte de 98's",command=self.BTN_Generar)
         self.btn_generar.grid(row=2)
 
         #Comienzo a darle forma al frame 2, contendrá 2 ROWS --------------------------------------------
@@ -76,7 +83,7 @@ class App(ctk.CTk):
         self.frame2.grid_columnconfigure(0, weight=1)
         self.frame2.grid_rowconfigure((1), weight=1)
         
-        
+        #Se crea el encabezado de SKU | DESCRIPCION | ¿ELIMINAR?
         self.frame2_row1=ctk.CTkFrame(self.frame2)
         self.frame2_row1.grid_columnconfigure((0,1,2), weight=1)
         self.frame2_row1.grid(row=0,sticky="ew",padx=10,pady=10)
@@ -88,14 +95,27 @@ class App(ctk.CTk):
         self.label_eliminar.grid(row=0,column=2)
 
         #ROW 1
-        scrollF_skus=ctk.CTkScrollableFrame(self.frame2)
-        scrollF_skus.grid(row=1,sticky="nsew",padx=10,pady=1)
-        scrollF_skus.grid_columnconfigure(0, weight=1)
+        self.scrollF_skus=ctk.CTkScrollableFrame(self.frame2)
+        self.scrollF_skus.grid(row=1,sticky="nsew",padx=10,pady=1)
+        self.scrollF_skus.grid_columnconfigure(0, weight=1)
        
-        for i in range(0,21):
-            sku1=SkuListado(scrollF_skus,f"{i}",f"SKU de prueba {i}")
-            sku1.pack(fill="x",pady=1)
+        # for i in range(0,21):
+        #     sku1=SkuListado(scrollF_skus,f"{i}",f"SKU de prueba {i}")
+        #     sku1.pack(fill="x",pady=1)
+    
+    def BTN_Verificar(self):
+        sku=self.entrada_sku.get()
+        self.df_final, descripcion, lista=RevisarSKU(sku,self.df_final,self.df_referencia)
+        print(f"SKU {sku} Revisado!!!!!!!")
+        print(self.df_final)
+        print(lista)
+        if lista==True:
+            objeto_listado=SkuListado(self.scrollF_skus,sku,descripcion)
+            objeto_listado.pack(fill='x',pady=1)
         
+    def BTN_Generar(self):
+        Generar_Reporte(self.df_final)
+        print("Archivo Generado!!!!")
 app = App()
 
 app.mainloop()
