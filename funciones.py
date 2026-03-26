@@ -2,7 +2,8 @@ import pandas as pd
 import os
 import openpyxl
 
-ruta=os.path.join('98s.xlsx')
+ruta=os.path.join("pruebas",'98s.xlsx')
+ruta_destino=os.path.join("pruebas","Reporte.csv")
 df_98=pd.read_excel(ruta)
 print(df_98)
 
@@ -32,3 +33,4 @@ df_reporte=revisar("21",df_reporte,df_98)
 print("\nReporte Final")
 df_reporte=pd.merge(df_reporte, df_98, on='SKU', how='left') #Hago el left Join para generar el reporte final
 print(df_reporte)
+df_reporte.to_csv(ruta_destino, index=False, encoding='utf-8-sig')
