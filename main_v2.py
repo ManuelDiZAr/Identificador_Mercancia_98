@@ -9,8 +9,8 @@ class SkuListado(ctk.CTkFrame):
         self.id_elemento=id
         self.eliminar=funcion_borrar
         # Se distribuyen pesos de las columnas
-        self.grid_columnconfigure(0, weight=1) # SKU
-        self.grid_columnconfigure(1, weight=3) # Descripcion (más larga)
+        self.grid_columnconfigure(0, weight=0) # SKU
+        self.grid_columnconfigure(1, weight=2) # Descripcion (más larga)
         self.grid_columnconfigure(2, weight=0) # El botón no necesita crecer
         
         self.label_sku = ctk.CTkLabel(self, text=sku)
@@ -38,40 +38,35 @@ class App(ctk.CTk):
 
         
         self.title("Verificador de 98's")
-        self.geometry("800x500")
+        self.geometry("550x700")
         self.resizable(False, False)
-        #Comenzamos a crear los Frames
-        self.grid_rowconfigure((1), weight=1) #Creo la fila en la que vivirán los 2 frames
-        self.grid_columnconfigure(0, weight=0) #Creo las 2 columnas en las que vivirán los frames
-        self.grid_columnconfigure(1, weight=100)
         
-        self.titulo_1 = ctk.CTkLabel(self, text="Verifica la Mercancia"
+        #Comenzamos a crear los Frames
+        self.grid_columnconfigure(0,weight=1)
+        self.grid_rowconfigure(0,weight=0)
+        self.grid_rowconfigure(1,weight=1)
+
+        
+        self.frame1=ctk.CTkFrame(self)
+        self.frame1.grid(row=0,column=0,padx=10, pady=(10, 10), sticky="nsew")
+        self.frame2=ctk.CTkFrame(self)
+        self.frame2.grid(row=1,column=0,padx=10, pady=(10, 10), sticky="nsew")
+
+        self.titulo_1 = ctk.CTkLabel(self.frame1, text="Verifica la Mercancia"
                                           , fg_color="transparent",
                                           font=("Roboto", 28, "bold"),       # Tamaño grande y negrita
                                           text_color="#5dade2",              # Un azul claro tipo "Tech" (o el que te guste)
                                           anchor="center")
         self.titulo_1.grid(row=0,column=0, sticky="ew",pady=10)
 
-        self.titulo_2 = ctk.CTkLabel(self, text="98's Encontrados"
-                                          , fg_color="transparent",
-                                          font=("Roboto", 28, "bold"),       # Tamaño grande y negrita
-                                          text_color="#5dade2",              # Un azul claro tipo "Tech" (o el que te guste)
-                                          anchor="center")
-        self.titulo_2.grid(row=0,column=1, sticky="ew",pady=10)
-
-
-        #Creo los 2 Frames, y hago que cada uno tome cada columna en su totalidad
-        self.frame1=ctk.CTkFrame(self)
-        self.frame1.grid(row=1,column=0,padx=10, pady=(10, 10), sticky="nsew")
-        self.frame2=ctk.CTkFrame(self)
-        self.frame2.grid(row=1,column=1,padx=10, pady=(10, 10), sticky="nsew")
+        
 
         #Comienzo a darle forma al Frame 1. Contendrá 4 ROWS ---------------------------------
         self.frame1.grid_columnconfigure(0, weight=1)
-        self.frame1.grid_rowconfigure((1,2), weight=1)
+        self.frame1.grid_rowconfigure((0,1,2,3), weight=1)
         #ROW 0
         self.frame_row1=ctk.CTkFrame(self.frame1,fg_color="transparent")
-        self.frame_row1.grid(row=0,pady=10)
+        self.frame_row1.grid(row=1,pady=10)
         
         self.label_sku=(ctk.CTkLabel(self.frame_row1,text="SKU:  "))
         self.label_sku.grid(row=0,column=0)
@@ -79,7 +74,7 @@ class App(ctk.CTk):
         self.entrada_sku.grid(row=0,column=1)
         self.entrada_sku.bind('<Return>', lambda event: self.BTN_Verificar())
         self.btn_verificar=ctk.CTkButton(self.frame_row1,text="Verificar",command=self.BTN_Verificar)
-        self.btn_verificar.grid(row=0,column=2,padx=10)
+        self.btn_verificar.grid(row=0,column=3,padx=10)
         #ROW 1
         self.label_sino=ctk.CTkLabel(self.frame1,
                                      text="Escanea un Artículo para Comenzar...",
@@ -90,36 +85,46 @@ class App(ctk.CTk):
                                      corner_radius=8,                   # Bordes suavizados
                                      padx=20
                                      )
-        self.label_sino.grid(row=1)
+        self.label_sino.grid(row=2)
         #ROW 2
         self.btn_generar=ctk.CTkButton(self.frame1,text="Generar Reporte de 98's",command=self.BTN_Generar)
-        self.btn_generar.grid(row=2)
+        self.btn_generar.grid(row=4)
 
-        #Comienzo a darle forma al frame 2, contendrá 2 ROWS --------------------------------------------
-        #ROW 0
-        self.frame2.grid_columnconfigure(0, weight=1)
-        self.frame2.grid_rowconfigure((1), weight=1)
+        #FRAME 2 DE ABAJO -------------------------------------------------------------
         
-        #Se crea el encabezado de SKU | DESCRIPCION | ¿ELIMINAR?
-        self.frame2_row1=ctk.CTkFrame(self.frame2)
-        self.frame2_row1.grid_columnconfigure((0,1,2), weight=1)
-        self.frame2_row1.grid(row=0,sticky="ew",padx=10,pady=10)
-        self.label_sku=ctk.CTkLabel(self.frame2_row1,text="SKU")
-        self.label_sku.grid(row=0,column=0)
-        self.label_desc=ctk.CTkLabel(self.frame2_row1,text="Descripcion")
-        self.label_desc.grid(row=0,column=1)
-        self.label_eliminar=ctk.CTkLabel(self.frame2_row1,text="¿Eliminar?")
-        self.label_eliminar.grid(row=0,column=2)
+        self.frame2.grid_columnconfigure(0, weight=1)
+        # Le damos peso real a la fila 2 (donde está el scroll) para que crezca
+        self.frame2.grid_rowconfigure(0, weight=0) # Titulo (fijo)
+        self.frame2.grid_rowconfigure(1, weight=0) # Encabezados (fijo)
+        self.frame2.grid_rowconfigure(2, weight=1) # Scroll (expandible)
 
-        #ROW 1
-        self.scrollF_skus=ctk.CTkScrollableFrame(self.frame2)
-        self.scrollF_skus.grid(row=1,sticky="nsew",padx=10,pady=1)
+        # FILA 0: EL TÍTULO
+        self.titulo_2 = ctk.CTkLabel(self.frame2, text="98's Encontrados",
+                                    font=("Roboto", 28, "bold"),
+                                    text_color="#5dade2")
+        self.titulo_2.grid(row=0, column=0, sticky="new", pady=10)
+
+        # FILA 1: ENCABEZADOS (SKU | DESCRIPCION | ¿ELIMINAR?)
+        self.frame2_row1 = ctk.CTkFrame(self.frame2)
+        self.frame2_row1.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 5))
+
+        self.frame2_row1.grid_columnconfigure((0), weight=0)
+        self.frame2_row1.grid_columnconfigure((1), weight=1)
+        self.frame2_row1.grid_columnconfigure((2), weight=0)
+        self.label_sku = ctk.CTkLabel(self.frame2_row1, text="    SKU                       Descripción")
+        self.label_sku.grid(row=0, column=0)
+        self.label_desc = ctk.CTkLabel(self.frame2_row1, text="")
+        self.label_desc.grid(row=0, column=1)
+        self.label_eliminar = ctk.CTkLabel(self.frame2_row1, text="¿Eliminar?    ")
+        self.label_eliminar.grid(row=0, column=2)
+
+        # FILA 2: EL SCROLLABLE FRAME
+        self.scrollF_skus = ctk.CTkScrollableFrame(self.frame2)
+        self.scrollF_skus.grid(row=2, column=0, sticky="nsew", padx=10, pady=5) # row 2
         self.scrollF_skus.grid_columnconfigure(0, weight=1)
-       
-        # for i in range(0,21):
-        #     sku1=SkuListado(scrollF_skus,f"{i}",f"SKU de prueba {i}")
-        #     sku1.pack(fill="x",pady=1)
-    
+        self.entrada_sku.focus()
+
+
     def BTN_Verificar(self):
         sku=self.entrada_sku.get()
         self.df_final, descripcion, lista, id=RevisarSKU(sku,self.df_final,self.df_referencia)
