@@ -36,7 +36,7 @@ class App(ctk.CTk):
         self.df_referencia=CargarDF_98()
         print("Archivo de reporte final creado con exito")
 
-
+        
         self.title("Verificador de 98's")
         self.geometry("800x500")
         self.resizable(False, False)
@@ -76,6 +76,7 @@ class App(ctk.CTk):
         self.label_sku.grid(row=0,column=0)
         self.entrada_sku=ctk.CTkEntry(self.frame_row1)
         self.entrada_sku.grid(row=0,column=1)
+        self.entrada_sku.bind('<Return>', lambda event: self.BTN_Verificar())
         self.btn_verificar=ctk.CTkButton(self.frame_row1,text="Verificar",command=self.BTN_Verificar)
         self.btn_verificar.grid(row=0,column=2,padx=10)
         #ROW 1
@@ -119,6 +120,8 @@ class App(ctk.CTk):
         if lista==True:
             objeto_listado=SkuListado(self.scrollF_skus,id,sku,descripcion,self.BTN_eliminar_listado)
             objeto_listado.pack(fill='x',pady=1)
+        self.entrada_sku.delete(0,'end')
+        self.entrada_sku.focus()
         
     def BTN_Generar(self):
         Generar_Reporte(self.df_final)

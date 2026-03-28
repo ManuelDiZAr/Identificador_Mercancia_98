@@ -49,7 +49,7 @@ def RevisarSKU(sku_escaneado,df_reporte,df_referencia):
     
     else:
         # Si no existe, retornamos el DF sin cambios y None en la descripción
-        return df_reporte, None, False, id
+        return df_reporte, None, False, None
 
 def Eliminar_Elemento(df_reporte,id_a_eliminar):
     
