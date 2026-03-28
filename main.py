@@ -1,10 +1,13 @@
 import customtkinter as ctk
 import os
-from funciones import CrearDF_Final, CargarDF_98, RevisarSKU, Generar_Reporte
+from funciones import CrearDF_Final, CargarDF_98, RevisarSKU, Generar_Reporte, Eliminar_Elemento
 
 class SkuListado(ctk.CTkFrame):
-    def __init__(self, master,sku, descripcion, **kwargs):
+    def __init__(self, master,id,sku, descripcion,funcion_borrar, **kwargs):
         super().__init__(master,**kwargs)
+        #Le asigno el ID al elemento. No se vera en la interfaz, pero servira de referencia
+        self.id_elemento=id
+        self.eliminar=funcion_borrar
         # Se distribuyen pesos de las columnas
         self.grid_columnconfigure(0, weight=1) # SKU
         self.grid_columnconfigure(1, weight=3) # Descripcion (más larga)
@@ -17,9 +20,13 @@ class SkuListado(ctk.CTkFrame):
         self.label_desc.grid(row=0, column=1, padx=10, sticky="w")
         
         # Agregamos un ancho pequeño (width) para que no sea un botón gigante
-        self.btn_delete = ctk.CTkButton(self, text="❌", width=40, fg_color="#333333", hover_color="red",command=self.destroy)
+        self.btn_delete = ctk.CTkButton(self, text="❌", width=40, fg_color="#333333", hover_color="red",command=self.BTN_eliminar_listado)
         self.btn_delete.grid(row=0, column=2, padx=5, pady=2)
-        
+    
+    def BTN_eliminar_listado(self):
+        self.eliminar(self.id_elemento)
+        self.destroy()
+        print(f"{self.id_elemento} Eliminado con exito")
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -105,17 +112,22 @@ class App(ctk.CTk):
     
     def BTN_Verificar(self):
         sku=self.entrada_sku.get()
-        self.df_final, descripcion, lista=RevisarSKU(sku,self.df_final,self.df_referencia)
+        self.df_final, descripcion, lista, id=RevisarSKU(sku,self.df_final,self.df_referencia)
         print(f"SKU {sku} Revisado!!!!!!!")
         print(self.df_final)
         print(lista)
         if lista==True:
-            objeto_listado=SkuListado(self.scrollF_skus,sku,descripcion)
+            objeto_listado=SkuListado(self.scrollF_skus,id,sku,descripcion,self.BTN_eliminar_listado)
             objeto_listado.pack(fill='x',pady=1)
         
     def BTN_Generar(self):
         Generar_Reporte(self.df_final)
         print("Archivo Generado!!!!")
+    
+    def BTN_eliminar_listado(self,id_a_borrar):
+        self.df_final=Eliminar_Elemento(self.df_final,id_a_borrar)
+        
+        print(self.df_final)
 app = App()
 
 app.mainloop()

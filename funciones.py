@@ -1,14 +1,12 @@
 import pandas as pd
 import os
 import openpyxl
-
-
-
+import time
 
 #Creo el DF que será el reporte final
 def CrearDF_Final():
     
-    df_reporte = pd.DataFrame(columns=['SKU','Descripcion'])
+    df_reporte = pd.DataFrame(columns=['ID','SKU','Descripcion'])
     print("Reporte inicial Creado")
     return df_reporte
 
@@ -30,13 +28,15 @@ def RevisarSKU(sku_escaneado,df_reporte,df_referencia):
 
     # 1. Buscamos si existe en la referencia
     if sku_buscado in df_referencia["SKU"].values:
-        
+        #Generamos un ID con timestamp
+        id=int(time.time()*1000)
         # 2. "VLOOKUP": Extraemos la descripción de esa fila específica
         # .loc[filas, columnas]
         descripcion = df_referencia.loc[df_referencia["SKU"] == sku_buscado, "DESCRIPCION"].values[0]
         
         # 3. Creamos el DF temporal incluyendo la descripción
         df_temporal = pd.DataFrame({
+            'ID':[id],
             'SKU': [sku_buscado], 
             'Descripcion': [descripcion]
         })
@@ -45,12 +45,17 @@ def RevisarSKU(sku_escaneado,df_reporte,df_referencia):
         df_reporte = pd.concat([df_reporte, df_temporal], ignore_index=True)
         
         # Retornamos el DF, el estatus de éxito y la descripción encontrada
-        return df_reporte, descripcion , True
+        return df_reporte, descripcion , True, id
     
     else:
         # Si no existe, retornamos el DF sin cambios y None en la descripción
-        return df_reporte, None, False
+        return df_reporte, None, False, id
+
+def Eliminar_Elemento(df_reporte,id_a_eliminar):
     
+    df_final=df_reporte[df_reporte['ID']!=id_a_eliminar].copy()
+    return df_final
+
 def Generar_Reporte(DF):
     ruta_destino=os.path.join("archivos","Reporte.csv")
     DF.to_csv(ruta_destino, index=False)
