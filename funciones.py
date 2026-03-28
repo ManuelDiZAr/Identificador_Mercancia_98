@@ -13,7 +13,7 @@ def CrearDF_Final():
 def CargarDF_98():
     ruta=os.path.join("archivos",'98s.xlsx')
     df_98=pd.read_excel(ruta)
-    df_98['SKU'] = df_98['SKU'].astype(str).str.strip() #Convierto todos los datos de SKU a STRing
+    df_98['SKU'] = df_98['SKU'].fillna(0).astype(int).astype(str).str.strip() #Convierto todos los datos de SKU a STRing
     print(df_98)
     print("Termino de imprimir el DF98-----------")
     return df_98
