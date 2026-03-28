@@ -80,7 +80,15 @@ class App(ctk.CTk):
         self.btn_verificar=ctk.CTkButton(self.frame_row1,text="Verificar",command=self.BTN_Verificar)
         self.btn_verificar.grid(row=0,column=2,padx=10)
         #ROW 1
-        self.label_sino=ctk.CTkLabel(self.frame1,text="Este label debe de cambiar a Sí es 98 o No Es 98 ")
+        self.label_sino=ctk.CTkLabel(self.frame1,
+                                     text="Escanea un Artículo para Comenzar...",
+                                     font=("Roboto", 16, "bold"),       # Fuente moderna y legible
+                                     fg_color="#2B2B2B",                # Fondo oscuro tipo pantalla
+                                     text_color="#FFEE00",              # Verde neón (da sensación de "Online/Listo")
+                                     height=45,                         # Un poco más de presencia física
+                                     corner_radius=8,                   # Bordes suavizados
+                                     padx=20
+                                     )
         self.label_sino.grid(row=1)
         #ROW 2
         self.btn_generar=ctk.CTkButton(self.frame1,text="Generar Reporte de 98's",command=self.BTN_Generar)
@@ -120,6 +128,9 @@ class App(ctk.CTk):
         if lista==True:
             objeto_listado=SkuListado(self.scrollF_skus,id,sku,descripcion,self.BTN_eliminar_listado)
             objeto_listado.pack(fill='x',pady=1)
+            self.Cambiar_label_Sino(True)
+        else:
+            self.Cambiar_label_Sino(False)
         self.entrada_sku.delete(0,'end')
         self.entrada_sku.focus()
         
@@ -131,6 +142,18 @@ class App(ctk.CTk):
         self.df_final=Eliminar_Elemento(self.df_final,id_a_borrar)
         
         print(self.df_final)
+
+    def Cambiar_label_Sino(self,si_no):
+        if si_no:
+            mensaje = "✅ Sí es 98"
+            color = "#18CF04"
+        else:
+            mensaje = "❌ No es 98"
+            color = "#DA0000"
+        self.label_sino.configure(text=mensaje, text_color=color)
+
+        self.after(1500, lambda: self.label_sino.configure(text="Esperando escaneo...", text_color="#FFEE00"))
+
 app = App()
 
 app.mainloop()
