@@ -1,0 +1,6 @@
+{
+    "columnas":{
+        "sku": ["SKU","sku","Articulo","ARTICULO","producto","PRODUCTO"],
+        "descripcion": ["DESCRIPCION", "descripcion","Descripcion", "Texto breve de articulo", "texto breve de articulo"]
+    }
+}

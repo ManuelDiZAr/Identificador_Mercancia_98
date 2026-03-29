@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import openpyxl
 import time
+import json
 
 #Creo el DF que será el reporte final
 def CrearDF_Final():
@@ -10,14 +11,39 @@ def CrearDF_Final():
     print("Reporte inicial Creado")
     return df_reporte
 
+def cargar_json():
+    with open("columnas.json","r",encoding="utf-8") as f:
+        return json.load(f)
+
+def encontrar_columnas(columnas,lista_sinonimos):
+    for col in columnas:
+        if col in lista_sinonimos:
+            return col
+    return None
+
 def CargarDF_98():
     try:
+        config = cargar_json()
+        print("JSON CARGADO CON EXITO!!")
         ruta=os.path.join("archivos",'98s.xlsx')
         df_98=pd.read_excel(ruta)
-        df_98['SKU'] = df_98['SKU'].fillna(0).astype(int).astype(str).str.strip() #Convierto todos los datos de SKU a STRing
-        print(df_98)
-        print("Termino de imprimir el DF98-----------")
-        return df_98, False
+        #Busco las columnas en el JSON
+        col_sku_real= encontrar_columnas(df_98, config["columnas"]["sku"])
+        col_desc_real= encontrar_columnas(df_98, config["columnas"]["descripcion"])
+
+        #Valido que ambas columnas existan en el archivo
+        if col_desc_real and col_sku_real:
+            print("Columnas Encontradas!!")
+            df_98=df_98.rename(columns={col_sku_real: "SKU", col_desc_real: "DESCRIPCION"})
+            print("Columnas Renombradas")
+        
+            df_98['SKU'] = df_98['SKU'].fillna(0).astype(int).astype(str).str.strip() #Convierto todos los datos de SKU a STRing
+            print("Datos de SKU Corregidos")
+            print(df_98)
+            print("Termino de imprimir el DF98-----------")
+            return df_98, False
+        else:
+            return None, True
     except:
         return None, True
 
