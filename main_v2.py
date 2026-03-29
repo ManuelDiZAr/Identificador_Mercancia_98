@@ -134,9 +134,11 @@ class App(ctk.CTk):
         if lista==True:
             objeto_listado=SkuListado(self.scrollF_skus,id,sku,descripcion,self.BTN_eliminar_listado)
             objeto_listado.pack(fill='x',pady=1)
+            self.update_idletasks()
             self.Cambiar_label_Sino(True)
         else:
             self.Cambiar_label_Sino(False)
+        self.scrollF_skus._parent_canvas.yview_moveto(1.0)
         self.entrada_sku.delete(0,'end')
         self.entrada_sku.focus()
         
