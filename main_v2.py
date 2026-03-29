@@ -1,5 +1,6 @@
 import customtkinter as ctk
-import os
+from tkinter import messagebox
+import sys
 from funciones import CrearDF_Final, CargarDF_98, RevisarSKU, Generar_Reporte, Eliminar_Elemento
 
 class SkuListado(ctk.CTkFrame):
@@ -33,7 +34,12 @@ class App(ctk.CTk):
         #Cargamos los dos archivos con los que vamos a trabajar
         self.df_final=CrearDF_Final()
         print("Archivo de referencia cargado con exito")
-        self.df_referencia=CargarDF_98()
+        self.df_referencia,self.error=CargarDF_98()
+        if self.error:
+            messagebox.showerror("Archivo no Encontrado",
+            "Archivo 98s.xlsx No ha sido encontrado, o no se encuentran las columas \n SKU | DESCRIPCION") # DE TIENDA | TIENDA | SKU | VENTAS | OH
+            self.destroy()
+            sys.exit() #Si se cumple la condición, el programa se cierra.
         print("Archivo de reporte final creado con exito")
 
         
@@ -127,7 +133,11 @@ class App(ctk.CTk):
 
     def BTN_Verificar(self):
         sku=self.entrada_sku.get()
-        self.df_final, descripcion, lista, id=RevisarSKU(sku,self.df_final,self.df_referencia)
+        self.df_final, descripcion, lista, id,self.error=RevisarSKU(sku,self.df_final,self.df_referencia)
+        if self.error:
+            messagebox.showerror("Error en Columnas",
+            "No se ha encontrado la(s) columna(s): SKU | DESCRIPCION") # DE TIENDA | TIENDA | SKU | VENTAS | OH
+            sys.exit() #Si se cumple la condición, el programa se cierra.
         print(f"SKU {sku} Revisado!!!!!!!")
         print(self.df_final)
         print(lista)
@@ -143,8 +153,17 @@ class App(ctk.CTk):
         self.entrada_sku.focus()
         
     def BTN_Generar(self):
-        Generar_Reporte(self.df_final)
-        print("Archivo Generado!!!!")
+        self.error=Generar_Reporte(self.df_final)
+        if self.error:
+            print("Archivo Generado!!!!")
+            messagebox.showinfo("Reporte creado",
+            "Se ha generado el reporte correctamente en la carpeta archivos") # DE TIENDA | TIENDA | SKU | VENTAS | OH
+            
+        else:
+            messagebox.showerror("Error en Carpeta",
+            "No se ha encontrado la carpeta Archivos") # DE TIENDA | TIENDA | SKU | VENTAS | OH
+            self.destroy()
+            sys.exit() #Si se cumple la condición, el programa se cierra.
     
     def BTN_eliminar_listado(self,id_a_borrar):
         self.df_final=Eliminar_Elemento(self.df_final,id_a_borrar)
